@@ -1,0 +1,6 @@
+dist/
+dist/*
+__pycache__/
+
+*.zip
+*.exe

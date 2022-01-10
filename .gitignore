@@ -1,6 +1,7 @@
 R3E_Launching/
 R3E_Launching/*
 __pycache__/
+Releases/
 
 *.zip
 *.exe

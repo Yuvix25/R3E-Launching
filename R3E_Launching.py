@@ -2,8 +2,9 @@
 Author: Yuval Rosen.
 """
 
+import os
 import mmap
-import struct
+import struct, json
 import math
 import time
 from tkinter import *
@@ -20,7 +21,31 @@ def mmap_io():
 
 
 
-EPSILON = 0.05
+
+preferences_file = os.path.join(os.path.dirname(__file__), 'config.json')
+preferences = dict()
+
+
+def save_preferences():
+    with open(preferences_file, 'w') as f:
+        json.dump(preferences, f, indent=4)
+
+def load_prefrences():
+    global preferences
+    if os.path.isfile(preferences_file):
+        with open(preferences_file, 'r') as f:
+            preferences = json.load(f)
+    else:
+        preferences = {
+            'zero_threshold': 0.1,
+            'stop_speed': 150,
+        }
+        save_preferences()
+    return preferences
+
+
+load_prefrences()
+
 
 
 def rps_to_rpm(rps):
@@ -28,7 +53,7 @@ def rps_to_rpm(rps):
 
 def mps_to_kph(mps):
     speed = mps * 3.6
-    if speed < EPSILON:
+    if speed < preferences['zero_threshold']:
         return 0
     return speed
 
@@ -47,10 +72,12 @@ class GUI:
 
         vcmd = (self.window.register(self.validate),
                 '%d', '%i', '%P', '%s', '%S', '%v', '%V', '%W')
-        self.window.entry = Entry(self.window, validate = 'key', validatecommand = vcmd)
-        self.window.entry.insert(END, '150')
-        self.window.entry.pack()
-
+        self.stop_speed_sv = StringVar()
+        self.stop_speed_sv.trace('w', lambda name, index, mode, sv=self.stop_speed_sv: self.set_stop_speed(sv))
+        self.window.stop_speed_entry = Entry(self.window, textvariable=self.stop_speed_sv, validate='key', validatecommand=vcmd)
+        # self.window.entry = Entry(self.window, validate = 'key', validatecommand = vcmd)
+        self.window.stop_speed_entry.insert(END, preferences['stop_speed'])
+        self.window.stop_speed_entry.pack()
 
 
         self.window.current_speed = Label(self.window, text="Current Speed: 0.0 km/h")
@@ -90,6 +117,12 @@ class GUI:
                 return False
         else:
             return False
+        
+    def set_stop_speed(self, sv):
+        if sv.get() == "":
+            return
+        preferences['stop_speed'] = float(sv.get())
+        save_preferences()
 
     def set_current_speed_label(self, speed):
         self.window.current_speed.config(text="Current Speed: %.1f km/h" % speed)
@@ -125,7 +158,7 @@ class GUI:
                 self.measuring = False
                 self.measure_start = 0
             
-            if self.window.entry.get() != "" and speed >= float(self.window.entry.get()) and self.measuring:
+            if speed >= preferences['stop_speed'] and self.measuring:
                 self.measuring = False
                 self.set_last_time_label(time.time() - self.measure_start)
                 self.set_last_rev_label(self.rpm_at_start)

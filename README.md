@@ -3,6 +3,7 @@ A tool for RaceRoom Racing Experience which shows you launch data.
 
 ## Usage
 Run the tool, change the Stop Speed to whatever you want, and then it will show you information about 0 to that speed runs.
+If the timer starts running without the car actually moving, increase `zero_threshold` in `config.json`.
 
 ## Installation
 You can check out pre-compiled versions in the [Forum] (might be outdated),

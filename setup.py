@@ -1,5 +1,5 @@
 from distutils.core import setup
-import py2exe, sys, shutil
+import py2exe, sys
 
 
 sys.argv.append('py2exe')
@@ -17,7 +17,6 @@ setup(
         'icon_resources': [(1, 'timer.ico')],
         'dest_base' : NAME,
         }],
+    data_files=[('', ['timer.ico']), ('', ['data.cs'])],
     zipfile = None,
 )
-
-shutil.copyfile('timer.ico', NAME + '/timer.ico')
